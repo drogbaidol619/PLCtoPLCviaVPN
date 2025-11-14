@@ -53,6 +53,7 @@ namespace PLCtoPLCviaVPN
 
                 MotorData motorData = plcSlave.ReadMotor(1, SLAVE_MOTOR_WRITE_OFFSET);
 
+                Console.WriteLine($"[SLAVE (DB1) -> MASTER (DB3)] Speed: {motorData.Speed}, Temp: {motorData.Temperature}");
                 if (motorData != null)
                 {
                     plcMaster.WriteMotor(motorData, 3, MASTER_MOTOR_READ_OFFSET);
@@ -74,14 +75,18 @@ namespace PLCtoPLCviaVPN
                         }
                     }));
                 }
+                else
+                {
+                    Console.WriteLine("[LỖI] Khong doc duoc tu Slave (DB1).");
+                }
 
-                // === 2. GỬI LỆNH: TỪ MASTER (DB4) -> XUỐNG SLAVE (DB2) ===
-                ControlData controlData = plcMaster.ReadControl(4, MASTER_CONTROL_WRITE_OFFSET);
+                    // === 2. GỬI LỆNH: TỪ MASTER (DB4) -> XUỐNG SLAVE (DB2) ===
+                    ControlData controlData = plcMaster.ReadControl(4, MASTER_CONTROL_WRITE_OFFSET);
 
                 if (controlData != null)
                 {
                     plcSlave.WriteControl(controlData, 2, SLAVE_CONTROL_READ_OFFSET);
-
+                    Console.WriteLine($"[MASTER (DB4) -> SLAVE (DB2)] Kp: {controlData.Kp}, Ki: {controlData.Ki}");
                     // Cập nhật giao diện 
                     this.Invoke(new Action(() =>
                     {
@@ -89,6 +94,10 @@ namespace PLCtoPLCviaVPN
                         lbKi.Text = controlData.Ki.ToString("0.0");
                         lbKd.Text = controlData.Kd.ToString("0.0");
                     }));
+                }
+                else
+                {
+                    Console.WriteLine("[LỖI] Khong doc duoc tu Master (DB4).");
                 }
             }
             catch (Exception ex)
